@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:background="#FF0A0A1A"
+    android:padding="48dp">
+
+    <!-- Sección izquierda: Título -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SPACE\nDEFENDER"
+            android:textSize="44sp"
+            android:textColor="#FF00D4FF"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MLB Edition"
+            android:textSize="16sp"
+            android:textColor="#88FFFFFF"
+            android:layout_marginTop="8dp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Touch to move · Tap to shoot\nKeyboard: W/S + Space"
+            android:textSize="12sp"
+            android:textColor="#55FFFFFF"
+            android:layout_marginTop="24dp"
+            android:fontFamily="monospace"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- Sección derecha: Controles del menú -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter your name:"
+            android:textSize="17sp"
+            android:textColor="#CCFFFFFF"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/editNombre_MLB"
+            android:layout_width="260dp"
+            android:layout_height="48dp"
+            android:hint="Player name"
+            android:textColor="#FFFFFFFF"
+            android:textColorHint="#55FFFFFF"
+            android:backgroundTint="#FF00D4FF"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="24dp"
+            android:textSize="16sp"
+            android:padding="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select difficulty:"
+            android:textSize="17sp"
+            android:textColor="#CCFFFFFF"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/radioGroupDificultad_MLB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp">
+
+            <RadioButton
+                android:id="@+id/radioFacil_MLB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  Easy  "
+                android:textColor="#FF4CAF50"
+                android:textSize="16sp"
+                android:checked="true"
+                android:buttonTint="#FF4CAF50"
+                android:layout_marginEnd="24dp" />
+
+            <RadioButton
+                android:id="@+id/radioDificil_MLB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  Hard  "
+                android:textColor="#FFFF5722"
+                android:textSize="16sp"
+                android:buttonTint="#FFFF5722" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnIniciar_MLB"
+            android:layout_width="200dp"
+            android:layout_height="54dp"
+            android:text="START GAME"
+            android:textSize="16sp"
+            android:textColor="#FF000000"
+            android:backgroundTint="#FF00D4FF" />
+
+    </LinearLayout>
+
+</LinearLayout>

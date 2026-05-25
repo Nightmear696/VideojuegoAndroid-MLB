@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#FF0A0000"
+    android:padding="48dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GAME OVER"
+        android:textSize="52sp"
+        android:textColor="#FFFF1744"
+        android:textStyle="bold"
+        android:fontFamily="monospace"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/txtNombre_MLB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Player"
+        android:textSize="22sp"
+        android:textColor="#CCFFFFFF"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/txtPuntuacion_MLB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Score: 0"
+        android:textSize="36sp"
+        android:textColor="#FFFFFFFF"
+        android:textStyle="bold"
+        android:fontFamily="monospace"
+        android:layout_marginBottom="40dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnReiniciar_MLB"
+            android:layout_width="170dp"
+            android:layout_height="54dp"
+            android:text="PLAY AGAIN"
+            android:textSize="14sp"
+            android:textColor="#FF000000"
+            android:backgroundTint="#FFFF5722"
+            android:layout_marginEnd="16dp" />
+
+        <Button
+            android:id="@+id/btnMenu_MLB"
+            android:layout_width="170dp"
+            android:layout_height="54dp"
+            android:text="MENU"
+            android:textSize="14sp"
+            android:textColor="#FF000000"
+            android:backgroundTint="#FF00D4FF" />
+
+    </LinearLayout>
+
+</LinearLayout>
