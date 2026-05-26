@@ -12,20 +12,6 @@ import android.view.MotionEvent
 import android.view.View
 import java.util.*
 
-/**
- * GameView - Vista personalizada que hereda de View
- * Núcleo del videojuego: renderizado, lógica e input.
- *
- * Patrón del curso:
- * - Hereda de View (ver teoría sección 3 "Dibujar elementos básicos")
- * - onDraw para dibujar la escena (Canvas + Paint)
- * - onTouchEvent para captar acciones del usuario (ratón/touch)
- * - onKeyDown/onKeyUp para captar acciones del teclado
- * - invalidate() para redibujar (llamado desde el Timer del GameActivity)
- * - RectF.intersects() para detección de colisiones
- *
- * Variables personalizadas con sufijo _MLB según requisito de la práctica.
- */
 class GameView : View {
 
     // ==================== JUGADOR (nave del jugador a la derecha) ====================

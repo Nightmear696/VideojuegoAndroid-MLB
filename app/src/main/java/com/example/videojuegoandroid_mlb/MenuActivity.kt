@@ -7,13 +7,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioGroup
 import android.widget.Toast
-
-/**
- * MenuActivity - Pantalla inicial del juego
- * Permite al usuario introducir su nombre y seleccionar el nivel de dificultad.
- * Requisito: "La primera pantalla que aparezca ha de ser aquella en donde se
- * introduzca el nombre y dos niveles de dificultad del juego." - 1 punto
- */
 class MenuActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

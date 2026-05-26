@@ -6,13 +6,6 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 
-/**
- * GameOverActivity - Pantalla de Game Over
- * Requisito: "A la que se detecte una única colisión ha de salir
- * la pantalla de Game Over." - 1 punto
- *
- * Muestra la puntuación final y permite reiniciar o volver al menú.
- */
 class GameOverActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
