@@ -3,6 +3,7 @@ package com.example.videojuegoandroid_mlb
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.SoundPool
@@ -10,15 +11,22 @@ import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat
 import java.util.*
 
 class GameView : View {
 
-    // ==================== JUGADOR (nave del jugador a la derecha) ====================
+    // ==================== JUGADOR (Torrente - nave del jugador a la derecha) ====================
     var jugadorX_MLB = 0f
     var jugadorY_MLB = 0f
-    val jugadorAncho_MLB = 120f
-    val jugadorAlto_MLB = 70f
+    val jugadorAncho_MLB = 160f
+    val jugadorAlto_MLB = 140f
+
+    // ==================== BITMAPS (imágenes pre-escaladas) ====================
+    var bitmapJugador_MLB: Bitmap? = null
+    var bitmapEnemigo_MLB: Bitmap? = null
+    var bitmapJugadorEscalado_MLB: Bitmap? = null
+    var bitmapEnemigoEscalado_MLB: Bitmap? = null
 
     // ==================== DIMENSIONES DEL JUEGO ====================
     var anchoJuego_MLB = 0
@@ -44,8 +52,8 @@ class GameView : View {
     data class NaveEnemiga_MLB(
         var x: Float, var y: Float,
         var velocidad: Float,
-        var ancho: Float = 90f,
-        var alto: Float = 55f
+        var ancho: Float = 120f,
+        var alto: Float = 120f
     )
     val navesEnemigas_MLB = mutableListOf<NaveEnemiga_MLB>()
 
@@ -68,17 +76,19 @@ class GameView : View {
     )
     val estrellas_MLB = mutableListOf<Estrella_MLB>()
 
-    // ==================== EXPLOSIONES (mejora visual) ====================
+    // ==================== EXPLOSIONES (imagen de explosión) ====================
     data class Explosion_MLB(
         var x: Float, var y: Float,
         var frame: Int = 0,
-        var maxFrame: Int = 20
+        var maxFrame: Int = 25
     )
     val explosiones_MLB = mutableListOf<Explosion_MLB>()
 
+    // Bitmap de explosión pre-escalado (cargado del GIF, primer frame)
+    var bitmapExplosion_MLB: Bitmap? = null
+    val tamExplosion_MLB = 150
+
     // ==================== SONIDOS ====================
-    // Requisito: "El juego debe tener sonidos diferentes. El sonido mientras
-    //             se juega y el sonido al recibir una colisión." - 1 punto
     var musicaFondo_MLB: MediaPlayer? = null
     var soundPool_MLB: SoundPool? = null
     var sonidoDisparoId_MLB = 0
@@ -157,6 +167,44 @@ class GameView : View {
     private fun initView_MLB() {
         isFocusable = true
         isFocusableInTouchMode = true
+
+        // Cargar bitmaps de Torrente (jugador) y Policía (enemigo)
+        // Se pre-escalan una sola vez para evitar hacerlo en cada frame (causa ANR)
+        try {
+            val drawableJugador = ContextCompat.getDrawable(context, R.drawable.player_torrente)
+            if (drawableJugador != null) {
+                bitmapJugador_MLB = (drawableJugador as BitmapDrawable).bitmap
+                bitmapJugadorEscalado_MLB = Bitmap.createScaledBitmap(
+                    bitmapJugador_MLB!!, jugadorAncho_MLB.toInt(), jugadorAlto_MLB.toInt(), true
+                )
+            }
+            val drawableEnemigo = ContextCompat.getDrawable(context, R.drawable.enemy_mafia)
+            if (drawableEnemigo != null) {
+                bitmapEnemigo_MLB = (drawableEnemigo as BitmapDrawable).bitmap
+                bitmapEnemigoEscalado_MLB = Bitmap.createScaledBitmap(
+                    bitmapEnemigo_MLB!!, 120, 120, true
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // Cargar imagen de explosión del GIF (primer frame) y pre-escalar
+        try {
+            val inputStream = context.resources.openRawResource(R.raw.explosion_anim)
+            val bmpOriginal = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
+            if (bmpOriginal != null) {
+                bitmapExplosion_MLB = Bitmap.createScaledBitmap(
+                    bmpOriginal, tamExplosion_MLB, tamExplosion_MLB, true
+                )
+                if (bmpOriginal != bitmapExplosion_MLB) {
+                    bmpOriginal.recycle()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     // ==================== INICIALIZACIÓN DEL JUEGO ====================
@@ -526,31 +574,37 @@ class GameView : View {
             }
         }
 
-        // === Explosiones (mejora visual) ===
+        // === Explosiones (imagen de explosión con fade-out) ===
         for (explosion_MLB in explosiones_MLB.toList()) {
-            val progress_MLB = explosion_MLB.frame.toFloat() / explosion_MLB.maxFrame
-            val radius_MLB = 20f + progress_MLB * 60f
-            val alpha_MLB = ((1f - progress_MLB) * 255).toInt().coerceIn(0, 255)
+            val bmpExp = bitmapExplosion_MLB
+            if (bmpExp != null) {
+                val progress_MLB = explosion_MLB.frame.toFloat() / explosion_MLB.maxFrame
+                val alpha_MLB = ((1f - progress_MLB) * 255).toInt().coerceIn(0, 255)
+                val escala_MLB = 0.5f + progress_MLB * 0.5f  // Crece de 50% a 100%
 
-            // Círculo exterior (naranja/rojo)
-            paintExplosion_MLB.color = Color.argb(
-                alpha_MLB, 255,
-                (180 * (1 - progress_MLB)).toInt().coerceIn(0, 255), 0
-            )
-            canvas.drawCircle(explosion_MLB.x, explosion_MLB.y, radius_MLB, paintExplosion_MLB)
+                paintExplosion_MLB.alpha = alpha_MLB
 
-            // Círculo medio (amarillo)
-            paintExplosion_MLB.color = Color.argb(
-                alpha_MLB, 255, 255,
-                (150 * (1 - progress_MLB)).toInt().coerceIn(0, 255)
-            )
-            canvas.drawCircle(explosion_MLB.x, explosion_MLB.y, radius_MLB * 0.6f, paintExplosion_MLB)
+                canvas.save()
+                canvas.translate(explosion_MLB.x, explosion_MLB.y)
+                canvas.scale(escala_MLB, escala_MLB)
+                canvas.drawBitmap(
+                    bmpExp,
+                    -tamExplosion_MLB / 2f,
+                    -tamExplosion_MLB / 2f,
+                    paintExplosion_MLB
+                )
+                canvas.restore()
 
-            // Círculo interior (blanco)
-            paintExplosion_MLB.color = Color.argb(
-                (alpha_MLB * 0.8f).toInt().coerceIn(0, 255), 255, 255, 255
-            )
-            canvas.drawCircle(explosion_MLB.x, explosion_MLB.y, radius_MLB * 0.3f, paintExplosion_MLB)
+                // Reset alpha
+                paintExplosion_MLB.alpha = 255
+            } else {
+                // Fallback: círculos si la imagen no cargó
+                val progress_MLB = explosion_MLB.frame.toFloat() / explosion_MLB.maxFrame
+                val radius_MLB = 20f + progress_MLB * 60f
+                val alpha_MLB = ((1f - progress_MLB) * 255).toInt().coerceIn(0, 255)
+                paintExplosion_MLB.color = Color.argb(alpha_MLB, 255, 180, 0)
+                canvas.drawCircle(explosion_MLB.x, explosion_MLB.y, radius_MLB, paintExplosion_MLB)
+            }
         }
 
         // === HUD (información en pantalla) ===
@@ -596,91 +650,36 @@ class GameView : View {
         }
     }
 
-    // ==================== DIBUJAR NAVE DEL JUGADOR ====================
-    // Nave apuntando a la IZQUIERDA (el jugador está a la derecha)
-    // Dibujada con Canvas Path (polígono)
+    // ==================== DIBUJAR NAVE DEL JUGADOR (TORRENTE) ====================
+    // Se dibuja la imagen pre-escalada de Torrente como la nave del jugador
     private fun dibujarNaveJugador_MLB(canvas: Canvas) {
         val x = jugadorX_MLB
         val y = jugadorY_MLB
         val w = jugadorAncho_MLB
         val h = jugadorAlto_MLB
 
-        // Motor (llamas animadas en el lado derecho)
-        val tamLlama_MLB = 15f + random_MLB.nextInt(20).toFloat()
-        paintMotor_MLB.color = Color.rgb(255, 150 + random_MLB.nextInt(105), 0)
-        val pathLlama_MLB = Path()
-        pathLlama_MLB.moveTo(x + w, y + h * 0.3f)
-        pathLlama_MLB.lineTo(x + w + tamLlama_MLB, y + h * 0.5f)
-        pathLlama_MLB.lineTo(x + w, y + h * 0.7f)
-        pathLlama_MLB.close()
-        canvas.drawPath(pathLlama_MLB, paintMotor_MLB)
-
-        // Cuerpo principal de la nave
-        val pathNave_MLB = Path()
-        pathNave_MLB.moveTo(x, y + h / 2)                    // Punta (izquierda)
-        pathNave_MLB.lineTo(x + w * 0.35f, y + h * 0.05f)    // Ala superior
-        pathNave_MLB.lineTo(x + w * 0.6f, y + h * 0.2f)      // Indentación superior
-        pathNave_MLB.lineTo(x + w, y + h * 0.25f)             // Cuerpo superior derecho
-        pathNave_MLB.lineTo(x + w, y + h * 0.75f)             // Cuerpo inferior derecho
-        pathNave_MLB.lineTo(x + w * 0.6f, y + h * 0.8f)      // Indentación inferior
-        pathNave_MLB.lineTo(x + w * 0.35f, y + h * 0.95f)    // Ala inferior
-        pathNave_MLB.close()
-        canvas.drawPath(pathNave_MLB, paintJugador_MLB)
-
-        // Detalle: línea central
-        val pathDetalle_MLB = Path()
-        pathDetalle_MLB.moveTo(x + w * 0.15f, y + h * 0.45f)
-        pathDetalle_MLB.lineTo(x + w * 0.9f, y + h * 0.45f)
-        pathDetalle_MLB.lineTo(x + w * 0.9f, y + h * 0.55f)
-        pathDetalle_MLB.lineTo(x + w * 0.15f, y + h * 0.55f)
-        pathDetalle_MLB.close()
-        canvas.drawPath(pathDetalle_MLB, paintJugadorDetalle_MLB)
-
-        // Cabina (detalle visual)
-        canvas.drawCircle(x + w * 0.45f, y + h * 0.5f, h * 0.12f, paintCabinaJugador_MLB)
+        val bmp = bitmapJugadorEscalado_MLB
+        if (bmp != null) {
+            canvas.drawBitmap(bmp, x, y, null)
+        } else {
+            // Fallback: dibujar rectángulo si la imagen no cargó
+            canvas.drawRect(x, y, x + w, y + h, paintJugador_MLB)
+        }
     }
 
-    // ==================== DIBUJAR NAVE ENEMIGA ====================
-    // Nave apuntando a la DERECHA (viene desde la izquierda)
+    // ==================== DIBUJAR NAVE ENEMIGA (POLICÍA) ====================
+    // Se dibuja la imagen pre-escalada del policía como la nave enemiga
     private fun dibujarNaveEnemiga_MLB(canvas: Canvas, enemigo_MLB: NaveEnemiga_MLB) {
         val x = enemigo_MLB.x
         val y = enemigo_MLB.y
-        val w = enemigo_MLB.ancho
-        val h = enemigo_MLB.alto
 
-        // Motor (llamas en el lado izquierdo)
-        val tamLlama_MLB = 10f + random_MLB.nextInt(12).toFloat()
-        paintMotor_MLB.color = Color.rgb(255, 80 + random_MLB.nextInt(80), 0)
-        val pathLlama_MLB = Path()
-        pathLlama_MLB.moveTo(x, y + h * 0.3f)
-        pathLlama_MLB.lineTo(x - tamLlama_MLB, y + h * 0.5f)
-        pathLlama_MLB.lineTo(x, y + h * 0.7f)
-        pathLlama_MLB.close()
-        canvas.drawPath(pathLlama_MLB, paintMotor_MLB)
-
-        // Cuerpo de la nave enemiga
-        val pathNave_MLB = Path()
-        pathNave_MLB.moveTo(x + w, y + h / 2)                 // Punta (derecha)
-        pathNave_MLB.lineTo(x + w * 0.65f, y + h * 0.05f)     // Ala superior
-        pathNave_MLB.lineTo(x + w * 0.4f, y + h * 0.2f)       // Indentación superior
-        pathNave_MLB.lineTo(x, y + h * 0.25f)                  // Cuerpo superior izquierdo
-        pathNave_MLB.lineTo(x, y + h * 0.75f)                  // Cuerpo inferior izquierdo
-        pathNave_MLB.lineTo(x + w * 0.4f, y + h * 0.8f)       // Indentación inferior
-        pathNave_MLB.lineTo(x + w * 0.65f, y + h * 0.95f)     // Ala inferior
-        pathNave_MLB.close()
-        canvas.drawPath(pathNave_MLB, paintEnemigo_MLB)
-
-        // Detalle central
-        val pathDetalle_MLB = Path()
-        pathDetalle_MLB.moveTo(x + w * 0.1f, y + h * 0.45f)
-        pathDetalle_MLB.lineTo(x + w * 0.85f, y + h * 0.45f)
-        pathDetalle_MLB.lineTo(x + w * 0.85f, y + h * 0.55f)
-        pathDetalle_MLB.lineTo(x + w * 0.1f, y + h * 0.55f)
-        pathDetalle_MLB.close()
-        canvas.drawPath(pathDetalle_MLB, paintEnemigoDetalle_MLB)
-
-        // Cabina
-        canvas.drawCircle(x + w * 0.55f, y + h * 0.5f, h * 0.1f, paintCabinaEnemigo_MLB)
+        val bmp = bitmapEnemigoEscalado_MLB
+        if (bmp != null) {
+            canvas.drawBitmap(bmp, x, y, null)
+        } else {
+            // Fallback: dibujar rectángulo si la imagen no cargó
+            canvas.drawRect(x, y, x + enemigo_MLB.ancho, y + enemigo_MLB.alto, paintEnemigo_MLB)
+        }
     }
 
     // ==================================================================
